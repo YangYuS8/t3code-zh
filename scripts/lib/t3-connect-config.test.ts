@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { loadRepoEnv } from "../../upstream/scripts/lib/public-config.ts";
-import { CONNECT_KEYS, checkT3ConnectSource, prepareT3ConnectConfig } from "./t3-connect-config.ts";
+import { CONNECT_KEYS, checkT3ConnectArtifacts, checkT3ConnectSource, readT3ConnectConfig, prepareT3ConnectConfig } from "./t3-connect-config.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 function fixture(t: test.TestContext): string {
@@ -84,4 +84,28 @@ test("build env contamination is rejected instead of packaged", async (t) => {
   prepareT3ConnectConfig(dir);
   fs.appendFileSync(path.join(dir, ".env"), "CLERK_SECRET_KEY=test-private\n");
   await assert.rejects(checkT3ConnectSource(dir, {}), /only public/);
+});
+
+test("release bundles retain Connect and reject product telemetry in every shipped surface", (t) => {
+  const dir = fixture(t);
+  const identifiers = Object.values(readT3ConnectConfig(path.join(dir, ".env.example"))).join("\n");
+  const files = [
+    ["apps/web/dist/assets/app.js", "t3code:analytics-device-id"],
+    ["apps/server/dist/bin.mjs", "ingest.t3.codes"],
+    ["apps/server/dist/client/assets/app.js", "install.owner_observed"],
+    ["apps/desktop/dist-electron/main.cjs", "T3CODE_POSTHOG_HOST"],
+    ["apps/desktop/dist-electron/preload.cjs", "X-Axiom-Dataset"],
+  ];
+  for (const [name] of files) {
+    const filename = path.join(dir, name);
+    fs.mkdirSync(path.dirname(filename), { recursive: true });
+    fs.writeFileSync(filename, identifiers);
+  }
+  checkT3ConnectArtifacts(dir);
+  for (const [name, marker] of files) {
+    const filename = path.join(dir, name);
+    fs.appendFileSync(filename, marker);
+    assert.throws(() => checkT3ConnectArtifacts(dir), /contains removed telemetry/);
+    fs.writeFileSync(filename, identifiers);
+  }
 });

@@ -30,6 +30,7 @@
 | 0022 | `0022-stable-display-strings.patch` | v0.1.0 新指南、提示词链接、工作流状态、遥测、更新与堆叠 PR 的显示边界；T19 中文空格与 GitCafe 判断整理 | 15 个 web 组件 / helper 与新增 `apps/web/src/stableDisplayStrings.ts`，详见补丁 |
 | 0023 | `0023-v011-display-strings.patch` | v0.1.1 跨设备克隆、EAS 主机、额度时间进度读屏名、Webhook 过滤错误与新状态、设备重试和商店按钮 | 8 个组件 / helper 与跨设备复制标题；新增 `apps/web/src/v011DisplayStrings.ts` |
 | 0024 | `0024-antigravity-quota-identity.patch` | T24 修复 Antigravity 旧客户端标识读取到不完整/全 100% 额度；隐藏未使用额度的滚动占位倒计时 | `apps/server/src/provider/antigravityUsageLimits.ts` 及对应测试 |
+| 0025 | `0025-remove-product-telemetry.patch` | 移除产品遥测、账号与设备归因、内置中继追踪；保留本地用量与自选 OTLP 导出 | 服务端、Web、桌面、移动端与共享客户端，完整文件列表见补丁 |
 
 ## 0011 minor-display-fixes
 

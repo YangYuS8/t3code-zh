@@ -68,8 +68,16 @@ export function checkT3ConnectArtifacts(sourceRoot: string): void {
     // client literals cannot conceal a missing server-side build fallback.
     ["server", readJs(path.join(sourceRoot, "apps/server/dist"), "client"), CONNECT_KEYS.filter((key) => key !== "T3CODE_CLERK_JWT_TEMPLATE")],
     ["desktop", fs.readFileSync(path.join(sourceRoot, "apps/desktop/dist-electron/main.cjs"), "utf8"), ["T3CODE_CLERK_PUBLISHABLE_KEY"]],
+    ["packaged web", readJs(path.join(sourceRoot, "apps/server/dist/client/assets")), CONNECT_KEYS],
+    ["preload", fs.readFileSync(path.join(sourceRoot, "apps/desktop/dist-electron/preload.cjs"), "utf8"), []],
   ] as const;
   for (const [label, code, keys] of targets) {
+    for (const marker of [
+      "ingest.t3.codes", "T3CODE_POSTHOG_HOST", "server.boot.heartbeat",
+      "install.owner_observed", "t3code:analytics-device-id", "X-Axiom-Dataset",
+    ]) {
+      if (code.includes(marker)) throw new Error(`${label} artifact contains removed telemetry: ${marker}`);
+    }
     for (const key of keys) {
       if (!code.includes(config[key])) throw new Error(`${label} artifact is missing public T3 Connect config: ${key}`);
     }
