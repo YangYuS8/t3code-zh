@@ -7,4 +7,6 @@
 - Web、移动端和本地服务端可各自创建 Axiom 导出器，服务端环境变量无法控制另一个进程。0025 同时移除导出器及其打包配置。用户明确设置的 OTLP 接收端有自己的配置路径。
 - 上游汉化版的 Releases 提供原始安装包。分发时核对产物版本；本分支版本为 `0.1.1-zh.2.privacy.1`。
 
+- CLI 和桌面安装包会在临时目录重新解析运行依赖。`node-pty` 的版本范围会选中比补丁更新的预发布版，引起 `ERR_PNPM_UNUSED_PATCH`。0026 将它固定到上游锁文件已有的 `1.2.0-beta.15`。升级这项依赖时同步检查原生终端补丁。
+
 可用 `node --test scripts/lib/t3-connect-config.test.ts` 检查构建规则。测试需要按 README 准备 `upstream/`。macOS 和 Windows 共用的产物检查会扫描服务端、随包网页、桌面主进程及 preload 中已知的遥测标记。
